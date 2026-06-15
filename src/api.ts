@@ -85,7 +85,7 @@ export interface MeetingDTO {
 
 export interface ReportDTO {
   project_id: string; project_name: string;
-  members: { member_id: string; name: string; todos_done: number; todos_total: number; contribution: number; score: number; speak_seconds: number; ai_comment: string | null }[];
+  members: { member_id: string; user_id: string | null; name: string; todos_done: number; todos_total: number; contribution: number; score: number; speak_seconds: number; ai_comment: string | null }[];
   total_todos: number; done_todos: number; completion_rate: number;
   meeting_count: number; overall_comment: string | null;
 }
@@ -161,11 +161,18 @@ export const NotificationAPI = {
   markRead: (id: string) => request<void>("/notifications/read", { method: "POST", body: JSON.stringify({ notification_id: id }) }),
 };
 
-export interface NoticeDTO { id: string; room_id: string; content: string; author_name: string; created_at: string; }
+export const InvitationAPI = {
+  accept: (memberId: string, roles: string[]) =>
+    request<void>(`/invitations/${memberId}/accept`, { method: "POST", body: JSON.stringify({ roles }) }),
+  decline: (memberId: string) =>
+    request<void>(`/invitations/${memberId}/decline`, { method: "DELETE" }),
+};
+
+export interface NoticeDTO { id: string; room_id: string; content: string; author_name: string; created_at: string; can_delete: boolean; }
 export interface PollDTO {
   id: string; room_id: string; question: string; options: string[];
   counts: number[]; total_votes: number; my_vote: number | null;
-  author_name: string; closed: boolean; created_at: string;
+  author_name: string; closed: boolean; created_at: string; can_delete: boolean;
 }
 
 export const ChatAPI = {
@@ -220,7 +227,7 @@ export interface FriendRequestDTO {
 export interface UserSearchResponse { user_id: string; username: string; name: string; }
 
 export interface FolderDTO { id: string; name: string; project_id: string | null; parent_id: string | null; created_at: string; }
-export interface FileDTO { id: string; name: string; mime_type: string | null; size: number; project_id: string | null; folder_id: string | null; url: string | null; created_at: string; }
+export interface FileDTO { id: string; name: string; mime_type: string | null; size_bytes: number; project_id: string | null; folder_id: string | null; url: string | null; created_at: string; }
 
 export const DriveAPI = {
   folders: (projectId?: string) => request<FolderDTO[]>(`/drive/folders${projectId ? `?project_id=${projectId}` : ''}`, { method: 'GET' }),
